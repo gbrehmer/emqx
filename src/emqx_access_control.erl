@@ -28,8 +28,8 @@
 -spec(authenticate(emqx_types:credentials())
       -> {ok, emqx_types:credentials()} | {error, term()}).
 authenticate(Credentials) ->
-    case emqx_hooks:run_fold('client.authenticate', [], init_auth_result(Credentials)) of
-    	#{auth_result := success, anonymous := true} = NewCredentials ->
+    case emqx_hooks:run_fold('client.authenticate', [Credentials], init_auth_result(Credentials)) of
+      #{auth_result := success, anonymous := true} = NewCredentials ->
             emqx_metrics:inc('auth.mqtt.anonymous'),
 	        {ok, NewCredentials};
         #{auth_result := success} = NewCredentials ->
@@ -73,4 +73,3 @@ init_auth_result(Credentials) ->
 	    true -> Credentials#{auth_result => success, anonymous => true};
 	    false -> Credentials#{auth_result => not_authorized, anonymous => false}
     end.
-
